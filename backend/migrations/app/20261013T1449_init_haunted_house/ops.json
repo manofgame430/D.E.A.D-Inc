@@ -1,0 +1,664 @@
+[
+  {
+    "id": "schema.public",
+    "label": "Create schema \"public\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres"
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "Create schema \"public\"",
+        "sql": "CREATE SCHEMA IF NOT EXISTS \"public\"",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "table.Encounter",
+    "label": "Create table \"Encounter\"",
+    "summary": "Creates table \"Encounter\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "Encounter"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"Encounter\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Encounter\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"Encounter\"",
+        "sql": "CREATE TABLE \"public\".\"Encounter\" (\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"duration\" int4,\n  \"fearRating\" int4,\n  \"id\" SERIAL NOT NULL,\n  \"monsterId\" int4 NOT NULL,\n  \"roomId\" int4,\n  \"updatedAt\" timestamptz NOT NULL,\n  \"visitId\" int4 NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"Encounter\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Encounter\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.Guest",
+    "label": "Create table \"Guest\"",
+    "summary": "Creates table \"Guest\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "Guest"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"Guest\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Guest\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"Guest\"",
+        "sql": "CREATE TABLE \"public\".\"Guest\" (\n  \"ageGroup\" text,\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"guestCode\" text NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"updatedAt\" timestamptz NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"Guest\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Guest\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.Monster",
+    "label": "Create table \"Monster\"",
+    "summary": "Creates table \"Monster\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "Monster"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"Monster\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Monster\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"Monster\"",
+        "sql": "CREATE TABLE \"public\".\"Monster\" (\n  \"active\" bool DEFAULT true NOT NULL,\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"email\" text NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"name\" text NOT NULL,\n  \"password\" text NOT NULL,\n  \"role\" text,\n  \"species\" text,\n  \"updatedAt\" timestamptz NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"Monster\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Monster\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.Room",
+    "label": "Create table \"Room\"",
+    "summary": "Creates table \"Room\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "Room"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"Room\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Room\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"Room\"",
+        "sql": "CREATE TABLE \"public\".\"Room\" (\n  \"active\" bool DEFAULT true NOT NULL,\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"description\" text,\n  \"difficulty\" int4,\n  \"id\" SERIAL NOT NULL,\n  \"name\" text NOT NULL,\n  \"updatedAt\" timestamptz NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"Room\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Room\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.Visit",
+    "label": "Create table \"Visit\"",
+    "summary": "Creates table \"Visit\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "Visit"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"Visit\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Visit\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"Visit\"",
+        "sql": "CREATE TABLE \"public\".\"Visit\" (\n  \"completed\" bool DEFAULT false NOT NULL,\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"duration\" int4,\n  \"endTime\" timestamptz,\n  \"fearRating\" int4,\n  \"guestId\" int4 NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  \"startTime\" timestamptz NOT NULL,\n  \"updatedAt\" timestamptz NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"Visit\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Visit\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.Guest.Guest_guestCode_key",
+    "label": "Add unique constraint on \"Guest\" (guestCode)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "Guest_guestCode_key",
+        "table": "Guest"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"Guest_guestCode_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Guest_guestCode_key",
+          "public",
+          "\"public\".\"Guest\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"Guest_guestCode_key\"",
+        "sql": "ALTER TABLE \"public\".\"Guest\" ADD CONSTRAINT \"Guest_guestCode_key\" UNIQUE (\"guestCode\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"Guest_guestCode_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Guest_guestCode_key",
+          "public",
+          "\"public\".\"Guest\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.Monster.Monster_email_key",
+    "label": "Add unique constraint on \"Monster\" (email)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "Monster_email_key",
+        "table": "Monster"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"Monster_email_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Monster_email_key",
+          "public",
+          "\"public\".\"Monster\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"Monster_email_key\"",
+        "sql": "ALTER TABLE \"public\".\"Monster\" ADD CONSTRAINT \"Monster_email_key\" UNIQUE (\"email\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"Monster_email_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Monster_email_key",
+          "public",
+          "\"public\".\"Monster\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.Room.Room_name_key",
+    "label": "Add unique constraint on \"Room\" (name)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "Room_name_key",
+        "table": "Room"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"Room_name_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Room_name_key",
+          "public",
+          "\"public\".\"Room\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"Room_name_key\"",
+        "sql": "ALTER TABLE \"public\".\"Room\" ADD CONSTRAINT \"Room_name_key\" UNIQUE (\"name\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"Room_name_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Room_name_key",
+          "public",
+          "\"public\".\"Room\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.Encounter.Encounter_monsterId_idx_6ebc3e37",
+    "label": "Create index \"Encounter_monsterId_idx_6ebc3e37\" on \"Encounter\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "Encounter_monsterId_idx_6ebc3e37",
+        "table": "Encounter"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"Encounter_monsterId_idx_6ebc3e37\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Encounter_monsterId_idx_6ebc3e37\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"Encounter_monsterId_idx_6ebc3e37\"",
+        "sql": "CREATE INDEX \"Encounter_monsterId_idx_6ebc3e37\" ON \"public\".\"Encounter\" (\"monsterId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"Encounter_monsterId_idx_6ebc3e37\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Encounter_monsterId_idx_6ebc3e37\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.Encounter.Encounter_roomId_idx_fe51d647",
+    "label": "Create index \"Encounter_roomId_idx_fe51d647\" on \"Encounter\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "Encounter_roomId_idx_fe51d647",
+        "table": "Encounter"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"Encounter_roomId_idx_fe51d647\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Encounter_roomId_idx_fe51d647\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"Encounter_roomId_idx_fe51d647\"",
+        "sql": "CREATE INDEX \"Encounter_roomId_idx_fe51d647\" ON \"public\".\"Encounter\" (\"roomId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"Encounter_roomId_idx_fe51d647\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Encounter_roomId_idx_fe51d647\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.Encounter.Encounter_visitId_idx_fcfcb8fb",
+    "label": "Create index \"Encounter_visitId_idx_fcfcb8fb\" on \"Encounter\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "Encounter_visitId_idx_fcfcb8fb",
+        "table": "Encounter"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"Encounter_visitId_idx_fcfcb8fb\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Encounter_visitId_idx_fcfcb8fb\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"Encounter_visitId_idx_fcfcb8fb\"",
+        "sql": "CREATE INDEX \"Encounter_visitId_idx_fcfcb8fb\" ON \"public\".\"Encounter\" (\"visitId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"Encounter_visitId_idx_fcfcb8fb\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Encounter_visitId_idx_fcfcb8fb\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.Visit.Visit_guestId_idx_39c95865",
+    "label": "Create index \"Visit_guestId_idx_39c95865\" on \"Visit\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "Visit_guestId_idx_39c95865",
+        "table": "Visit"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"Visit_guestId_idx_39c95865\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Visit_guestId_idx_39c95865\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"Visit_guestId_idx_39c95865\"",
+        "sql": "CREATE INDEX \"Visit_guestId_idx_39c95865\" ON \"public\".\"Visit\" (\"guestId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"Visit_guestId_idx_39c95865\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Visit_guestId_idx_39c95865\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.Encounter.Encounter_visitId_fkey",
+    "label": "Add foreign key \"Encounter_visitId_fkey\" on \"Encounter\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "Encounter_visitId_fkey",
+        "table": "Encounter"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"Encounter_visitId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Encounter_visitId_fkey",
+          "public",
+          "\"public\".\"Encounter\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"Encounter_visitId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"Encounter\"\nADD CONSTRAINT \"Encounter_visitId_fkey\"\nFOREIGN KEY (\"visitId\")\nREFERENCES \"public\".\"Visit\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"Encounter_visitId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Encounter_visitId_fkey",
+          "public",
+          "\"public\".\"Encounter\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.Encounter.Encounter_monsterId_fkey",
+    "label": "Add foreign key \"Encounter_monsterId_fkey\" on \"Encounter\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "Encounter_monsterId_fkey",
+        "table": "Encounter"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"Encounter_monsterId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Encounter_monsterId_fkey",
+          "public",
+          "\"public\".\"Encounter\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"Encounter_monsterId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"Encounter\"\nADD CONSTRAINT \"Encounter_monsterId_fkey\"\nFOREIGN KEY (\"monsterId\")\nREFERENCES \"public\".\"Monster\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"Encounter_monsterId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Encounter_monsterId_fkey",
+          "public",
+          "\"public\".\"Encounter\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.Encounter.Encounter_roomId_fkey",
+    "label": "Add foreign key \"Encounter_roomId_fkey\" on \"Encounter\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "Encounter_roomId_fkey",
+        "table": "Encounter"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"Encounter_roomId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Encounter_roomId_fkey",
+          "public",
+          "\"public\".\"Encounter\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"Encounter_roomId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"Encounter\"\nADD CONSTRAINT \"Encounter_roomId_fkey\"\nFOREIGN KEY (\"roomId\")\nREFERENCES \"public\".\"Room\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"Encounter_roomId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Encounter_roomId_fkey",
+          "public",
+          "\"public\".\"Encounter\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.Visit.Visit_guestId_fkey",
+    "label": "Add foreign key \"Visit_guestId_fkey\" on \"Visit\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "Visit_guestId_fkey",
+        "table": "Visit"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"Visit_guestId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Visit_guestId_fkey",
+          "public",
+          "\"public\".\"Visit\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"Visit_guestId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"Visit\"\nADD CONSTRAINT \"Visit_guestId_fkey\"\nFOREIGN KEY (\"guestId\")\nREFERENCES \"public\".\"Guest\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"Visit_guestId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Visit_guestId_fkey",
+          "public",
+          "\"public\".\"Visit\""
+        ]
+      }
+    ]
+  }
+]

@@ -1,0 +1,85 @@
+// use prisma-8
+
+model Monster {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+
+  species   String?
+  role      String?
+  active    Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt temporal.updatedAt()
+
+  encounters Encounter[]
+}
+
+
+model Guest {
+  id        Int      @id @default(autoincrement())
+
+  guestCode String   @unique
+  ageGroup  String?
+
+  createdAt DateTime @default(now())
+  updatedAt temporal.updatedAt()
+
+  visits    Visit[]
+}
+
+
+model Room {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String?
+  difficulty  Int?
+  active      Boolean  @default(true)
+
+  createdAt   DateTime @default(now())
+  updatedAt   temporal.updatedAt()
+
+  encounters  Encounter[]
+}
+
+
+model Visit {
+  id          Int      @id @default(autoincrement())
+
+  guestId     Int
+
+  guest       Guest    @relation(fields: [guestId], references: [id])
+
+  startTime   DateTime
+  endTime     DateTime?
+
+  duration    Int?
+
+  fearRating  Int?
+  completed   Boolean  @default(false)
+
+  createdAt   DateTime @default(now())
+  updatedAt   temporal.updatedAt()
+
+  encounters  Encounter[]
+}
+
+
+model Encounter {
+  id          Int      @id @default(autoincrement())
+
+  visitId     Int
+  monsterId   Int
+  roomId      Int?
+
+  visit       Visit    @relation(fields: [visitId], references: [id])
+  monster     Monster  @relation(fields: [monsterId], references: [id])
+  room        Room?    @relation(fields: [roomId], references: [id])
+
+  fearRating  Int?
+  duration    Int?
+
+  createdAt   DateTime @default(now())
+  updatedAt   temporal.updatedAt()
+}
