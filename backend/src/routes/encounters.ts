@@ -34,6 +34,17 @@ router.post("/", async (req, res) => {
         message: "Visit ID and monster ID are required"
       });
     }
+    
+    if (
+      fearRating !== undefined &&
+      fearRating !== null &&
+      (fearRating < 0 || fearRating > 10)
+    ) {
+      return res.status(400).json({
+        status: "error",
+        message: "Fear rating must be between 0 and 10"
+      });
+    }
 
     const encounter = await db.orm.public.Encounter.create({
       visitId,

@@ -36,6 +36,17 @@ router.post("/", async (req, res) => {
       });
     }
 
+    if (
+      fearRating !== undefined &&
+      fearRating !== null &&
+      (fearRating < 0 || fearRating > 10)
+    ) {
+      return res.status(400).json({
+        status: "error",
+        message: "Fear rating must be between 0 and 10"
+      });
+    }
+
     const visit = await db.orm.public.Visit.create({
       guestId,
       startTime,
