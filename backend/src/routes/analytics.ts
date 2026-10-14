@@ -3,62 +3,63 @@ import { db } from "../prisma/db.ts";
 
 const router = express.Router();
 
+/**
+ * Rounds a number to two decimal places.
+ */
+function roundToTwo(value: number): number {
+  return Number(value.toFixed(2));
+}
+
+/**
+ * Calculates an average while ignoring null/undefined values.
+ * Returns 0 when there are no values to average.
+ */
+function average(values: Array<number | null | undefined>): number {
+  const validValues = values.filter(
+    (value): value is number => value !== null && value !== undefined
+  );
+
+  if (validValues.length === 0) {
+    return 0;
+  }
+
+  const total = validValues.reduce((sum, value) => sum + value, 0);
+  return total / validValues.length;
+}
+
 /*
  * GET /api/analytics/overview
  *
  * Returns the main statistics for the D.E.A.D. Inc. dashboard.
  */
-router.get("/overview", async (req, res) => {
+router.get("/overview", async (_req, res) => {
   try {
-    const guests = await db.orm.public.Guest.all();
-    const visits = await db.orm.public.Visit.all();
+    const [guests, visits] = await Promise.all([
+      db.orm.public.Guest.all(),
+      db.orm.public.Visit.all()
+    ]);
 
     const totalGuests = guests.length;
     const totalVisits = visits.length;
 
-    // Only use visits that actually have a fear rating.
-    const visitsWithFear = visits.filter(
-      (visit) => visit.fearRating !== null && visit.fearRating !== undefined
+    const averageFear = average(visits.map((visit) => visit.fearRating));
+    const averageVisitDuration = average(
+      visits.map((visit) => visit.duration)
     );
-
-    const averageFear =
-      visitsWithFear.length > 0
-        ? visitsWithFear.reduce(
-            (total, visit) => total + visit.fearRating,
-            0
-          ) / visitsWithFear.length
-        : 0;
-
-    // Only use visits that have a duration.
-    const visitsWithDuration = visits.filter(
-      (visit) => visit.duration !== null && visit.duration !== undefined
-    );
-
-    const averageVisitDuration =
-      visitsWithDuration.length > 0
-        ? visitsWithDuration.reduce(
-            (total, visit) => total + visit.duration,
-            0
-          ) / visitsWithDuration.length
-        : 0;
 
     const completedVisits = visits.filter(
       (visit) => visit.completed === true
     ).length;
 
     const completionRate =
-      totalVisits > 0
-        ? (completedVisits / totalVisits) * 100
-        : 0;
+      totalVisits > 0 ? (completedVisits / totalVisits) * 100 : 0;
 
     res.json({
       totalGuests,
       totalVisits,
-      averageFear: Number(averageFear.toFixed(2)),
-      averageVisitDuration: Number(
-        averageVisitDuration.toFixed(2)
-      ),
-      completionRate: Number(completionRate.toFixed(2))
+      averageFear: roundToTwo(averageFear),
+      averageVisitDuration: roundToTwo(averageVisitDuration),
+      completionRate: roundToTwo(completionRate)
     });
   } catch (error) {
     console.error("Failed to get analytics overview:", error);
@@ -70,42 +71,32 @@ router.get("/overview", async (req, res) => {
   }
 });
 
-
 /*
  * GET /api/analytics/monsters
  *
  * Returns encounter counts and average fear ratings for each monster.
  */
-router.get("/monsters", async (req, res) => {
+router.get("/monsters", async (_req, res) => {
   try {
-    const monsters = await db.orm.public.Monster.all();
-    const encounters = await db.orm.public.Encounter.all();
+    const [monsters, encounters] = await Promise.all([
+      db.orm.public.Monster.all(),
+      db.orm.public.Encounter.all()
+    ]);
 
     const monsterAnalytics = monsters.map((monster) => {
       const monsterEncounters = encounters.filter(
         (encounter) => encounter.monsterId === monster.id
       );
 
-      const encountersWithFear = monsterEncounters.filter(
-        (encounter) =>
-          encounter.fearRating !== null &&
-          encounter.fearRating !== undefined
+      const averageFear = average(
+        monsterEncounters.map((encounter) => encounter.fearRating)
       );
-
-      const averageFear =
-        encountersWithFear.length > 0
-          ? encountersWithFear.reduce(
-              (total, encounter) =>
-                total + encounter.fearRating,
-              0
-            ) / encountersWithFear.length
-          : 0;
 
       return {
         id: monster.id,
         name: monster.name,
         encounters: monsterEncounters.length,
-        averageFear: Number(averageFear.toFixed(2))
+        averageFear: roundToTwo(averageFear)
       };
     });
 
@@ -120,42 +111,32 @@ router.get("/monsters", async (req, res) => {
   }
 });
 
-
 /*
  * GET /api/analytics/rooms
  *
  * Returns encounter counts and average fear ratings for each room.
  */
-router.get("/rooms", async (req, res) => {
+router.get("/rooms", async (_req, res) => {
   try {
-    const rooms = await db.orm.public.Room.all();
-    const encounters = await db.orm.public.Encounter.all();
+    const [rooms, encounters] = await Promise.all([
+      db.orm.public.Room.all(),
+      db.orm.public.Encounter.all()
+    ]);
 
     const roomAnalytics = rooms.map((room) => {
       const roomEncounters = encounters.filter(
         (encounter) => encounter.roomId === room.id
       );
 
-      const encountersWithFear = roomEncounters.filter(
-        (encounter) =>
-          encounter.fearRating !== null &&
-          encounter.fearRating !== undefined
+      const averageFear = average(
+        roomEncounters.map((encounter) => encounter.fearRating)
       );
-
-      const averageFear =
-        encountersWithFear.length > 0
-          ? encountersWithFear.reduce(
-              (total, encounter) =>
-                total + encounter.fearRating,
-              0
-            ) / encountersWithFear.length
-          : 0;
 
       return {
         id: room.id,
         name: room.name,
         encounters: roomEncounters.length,
-        averageFear: Number(averageFear.toFixed(2))
+        averageFear: roundToTwo(averageFear)
       };
     });
 
@@ -170,30 +151,27 @@ router.get("/rooms", async (req, res) => {
   }
 });
 
-
 /*
  * GET /api/analytics/attendance
  *
  * Groups visits by date so the dashboard can display
  * attendance over time.
  */
-router.get("/attendance", async (req, res) => {
+router.get("/attendance", async (_req, res) => {
   try {
     const visits = await db.orm.public.Visit.all();
-
     const attendanceByDate: Record<string, number> = {};
 
-    visits.forEach((visit) => {
-      const date = new Date(visit.startTime)
-        .toISOString()
-        .split("T")[0];
+    for (const visit of visits) {
+      const visitDate = new Date(String(visit.startTime));
 
-      if (attendanceByDate[date]) {
-        attendanceByDate[date]++;
-      } else {
-        attendanceByDate[date] = 1;
+      if (Number.isNaN(visitDate.getTime())) {
+        continue;
       }
-    });
+
+      const date = visitDate.toISOString().split("T")[0];
+      attendanceByDate[date] = (attendanceByDate[date] ?? 0) + 1;
+    }
 
     const attendance = Object.entries(attendanceByDate)
       .map(([date, visits]) => ({
@@ -213,16 +191,19 @@ router.get("/attendance", async (req, res) => {
   }
 });
 
-
 export default router;
 
-// Total Guests: Counts the number of records in the Guests table.
-// Total Visits: Counts the number of records in the Visits table.
-// Average Fear: Adds all recorded fear ratings and divides by the number of rated visits.
-// Average Visit Duration: Adds all recorded visit durations and divides by the number of visits with a duration.
-// Completion Rate: Divides completed visits by total visits and multiplies by 100.
-// Monster Encounters: Counts how many encounter records are associated with each monster.
-// Monster Average Fear: Adds a monster's encounter fear ratings and divides by that monster's number of rated encounters.
-// Room Encounters: Counts how many encounter records occurred in each room.
-// Room Average Fear: Adds a room's encounter fear ratings and divides by that room's number of rated encounters.
-// Attendance: Groups visits by date and counts how many visits occurred on each date.
+/*
+ * Mathematical calculations used:
+ *
+ * Total Guests: number of records in the Guest table.
+ * Total Visits: number of records in the Visit table.
+ * Average Fear: sum of recorded fear ratings / number of rated visits.
+ * Average Visit Duration: sum of recorded durations / number of visits with a duration.
+ * Completion Rate: completed visits / total visits * 100.
+ * Monster Encounters: number of Encounter records with each monster.
+ * Monster Average Fear: sum of a monster's fear ratings / number of rated encounters.
+ * Room Encounters: number of Encounter records associated with each room.
+ * Room Average Fear: sum of a room's fear ratings / number of rated encounters.
+ * Attendance: visits grouped by calendar date and counted.
+ */
