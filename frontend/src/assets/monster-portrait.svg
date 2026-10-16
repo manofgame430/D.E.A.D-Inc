@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-label="Haunted monster portrait">
+  <defs>
+    <radialGradient id="moon" cx="35%" cy="28%">
+      <stop offset="0" stop-color="#fff1bd"/>
+      <stop offset=".58" stop-color="#e8a24b"/>
+      <stop offset="1" stop-color="#71324f"/>
+    </radialGradient>
+  </defs>
+  <rect width="240" height="240" rx="18" fill="#160d1d"/>
+  <circle cx="120" cy="92" r="76" fill="url(#moon)" opacity=".9"/>
+  <path d="M43 240c4-62 34-96 77-96s73 34 77 96z" fill="#110916"/>
+  <path d="M66 94 43 43l46 25c17-11 45-11 62 0l46-25-23 51c8 13 10 31 2 45-14 23-34 31-56 31s-42-8-56-31c-8-14-6-32 2-45Z" fill="#241225"/>
+  <path d="m87 103 13 7-14 8M153 103l-13 7 14 8" fill="none" stroke="#ff9f2e" stroke-width="6" stroke-linecap="round"/>
+  <path d="M91 137c18 12 40 12 58 0" fill="none" stroke="#b94355" stroke-width="5" stroke-linecap="round"/>
+  <path d="M104 140v12M136 140v12" stroke="#fff0c9" stroke-width="3"/>
+</svg>

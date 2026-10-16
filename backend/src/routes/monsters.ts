@@ -21,18 +21,18 @@ router.get("/", async (req, res) => {
 
 router.post("/", async (req, res) => {
   try {
-    const { name, email, password, species, role, active } = req.body;
+    const { name, password, species, role, active } = req.body;
 
-    if (!name || !email || !password) {
+    if (!name || !password) {
       return res.status(400).json({
         status: "error",
-        message: "Name, email, and password are required"
+        message: "Name and password are required"
       });
     }
 
     const monster = await db.orm.public.Monster.create({
       name,
-      email,
+      email: `monster-${Date.now()}-${Math.random().toString(36).slice(2)}@deadinc.local`,
       password,
       species,
       role,

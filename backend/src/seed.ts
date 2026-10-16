@@ -94,51 +94,51 @@ async function main() {
 
   const monsterData = [
     {
-      name: "The Shadow",
-      email: "shadow@deadinc.com",
-      password: "fake-password",
-      species: "Shadow",
-      role: "Stalker",
-      active: true
-    },
-    {
       name: "The Butcher",
       email: "butcher@deadinc.com",
       password: "fake-password",
-      species: "Human",
-      role: "Chaser",
+      species: "Demon",
+      role: "Director of Provisions",
       active: true
     },
     {
-      name: "The Doll",
-      email: "doll@deadinc.com",
+      name: "Creepy Clown",
+      email: "creepyclown@deadinc.com",
+      password: "fake-password",
+      species: "Clown",
+      role: "Senior Laughter Engineer",
+      active: true
+    },
+    {
+      name: "Flesh Mass",
+      email: "fleshmass@deadinc.com",
+      password: "fake-password",
+      species: "Aberration",
+      role: "Containment Specialist",
+      active: true
+    },
+    {
+      name: "Haunted Doll",
+      email: "haunteddoll@deadinc.com",
       password: "fake-password",
       species: "Possessed Doll",
-      role: "Scare Actor",
+      role: "Guest Relations Consultant",
       active: true
     },
     {
-      name: "The Clown",
-      email: "clown@deadinc.com",
+      name: "Haunted Mascot",
+      email: "hauntedmascot@deadinc.com",
       password: "fake-password",
-      species: "Human",
-      role: "Scare Actor",
+      species: "Mascot",
+      role: "Brand Engagement Lead",
       active: true
     },
     {
-      name: "The Witch",
-      email: "witch@deadinc.com",
+      name: "Tall Stranger",
+      email: "tallstranger@deadinc.com",
       password: "fake-password",
-      species: "Witch",
-      role: "Stalker",
-      active: true
-    },
-    {
-      name: "The Phantom",
-      email: "phantom@deadinc.com",
-      password: "fake-password",
-      species: "Ghost",
-      role: "Stalker",
+      species: "Unknown",
+      role: "Director of Quiet Operations",
       active: true
     }
   ];
@@ -160,45 +160,39 @@ async function main() {
 
   const roomData = [
     {
-      name: "Entrance Hall",
-      description: "The entrance to the haunted house.",
-      difficulty: 2,
-      active: true
-    },
-    {
-      name: "Haunted Kitchen",
-      description: "A dark kitchen filled with strange noises.",
-      difficulty: 5,
-      active: true
-    },
-    {
-      name: "Cemetery",
-      description: "A fog-covered indoor cemetery.",
-      difficulty: 7,
-      active: true
-    },
-    {
-      name: "Doll Room",
-      description: "A room filled with creepy dolls.",
-      difficulty: 8,
-      active: true
-    },
-    {
-      name: "Basement",
-      description: "A dark underground room.",
+      name: "The Butcher's Pantry",
+      description: "A provision room overseen by the house's Director of Provisions.",
       difficulty: 9,
       active: true
     },
     {
-      name: "Clown Corridor",
-      description: "A corridor occupied by a particularly unsettling clown.",
-      difficulty: 6,
+      name: "The Funhouse",
+      description: "A hall of mirrors managed by the Senior Laughter Engineer.",
+      difficulty: 8,
       active: true
     },
     {
-      name: "Final Chamber",
-      description: "The final room of the haunted house.",
+      name: "The Containment Room",
+      description: "A sealed room for the mansion's most unusual resident.",
       difficulty: 10,
+      active: true
+    },
+    {
+      name: "The Doll Parlour",
+      description: "A parlour filled with keepsakes and perfectly timed stares.",
+      difficulty: 8,
+      active: true
+    },
+    {
+      name: "The Mascot Lounge",
+      description: "A lounge for meet-and-greets, costume audits, and unscheduled parades.",
+      difficulty: 7,
+      active: true
+    },
+    {
+      name: "The Long Gallery",
+      description: "A silent gallery maintained by the Director of Quiet Operations.",
+      difficulty: 9,
       active: true
     }
   ];
