@@ -150,7 +150,7 @@ function VisitsPage({ data }) {
   </div>;
 }
 
-function App() {
+function App({ onReturnToMansion }) {
   const [pageId, setPageId] = useState(() => window.location.hash.slice(1) || "analytics");
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
@@ -178,7 +178,7 @@ function App() {
       <span className="bat bat-three" />
       <span className="bat bat-four" />
     </div>
-    <header className="dashboard-header"><div><p className="eyebrow">HAUNTED CORP. / HAUNTED HOUSE OPERATIONS</p><h1>Haunted House Intelligence</h1><p className="header-copy">A spectral readout of every scream, scare, and visitor.</p></div><div className="status-pill"><span /> HOUSE ONLINE</div></header>
+    <header className="dashboard-header"><div><p className="eyebrow">HAUNTED CORP. / HAUNTED HOUSE OPERATIONS</p><h1>Haunted House Intelligence</h1><p className="header-copy">A spectral readout of every scream, scare, and visitor.</p></div><div className="dashboard-header-actions"><div className="status-pill"><span /> HOUSE ONLINE</div><button className="return-mansion-button" type="button" onClick={onReturnToMansion}>← Return to Mansion</button></div></header>
     <nav className="page-nav" aria-label="Data pages">{PAGES.map((item) => <a className={item.id === page.id ? "active" : ""} href={`#${item.id}`} key={item.id}>{item.label}</a>)}</nav>
     <div className="page-heading"><p className="eyebrow">SOURCE / {page.paths.join(" · ")}</p><h2>{page.label}</h2></div>
     {error?.pageId === page.id ? <div className="error-state"><h2>Page unavailable</h2><p>{error.message}. Confirm the API is running on port 3000.</p></div> : result?.pageId !== page.id ? <div className="loading-state">Loading {page.label.toLowerCase()} data...</div> : <div className="page-content"><Page data={page.paths.length === 1 ? result.data[0] : result.data} /></div>}

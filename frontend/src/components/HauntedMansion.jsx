@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 const WORLD = { width: 960, height: 600 };
+const API_URL = "http://localhost:3000/api";
+const MONSTER_Y_OFFSET = -30;
+const FOYER_CENTER_X = 480;
+const FOYER_X_OFFSET = FOYER_CENTER_X - 462;
 const ASSET_ROOT = "/assets";
 const PALETTE = {
   slimeGreen: "#A6D854",
@@ -16,14 +20,14 @@ const PALETTE = {
 };
 const MONSTER_ROOM_LAYOUT = {
   2: [
-    { x: 190, y: 220, roomName: "The Butcher's Pantry", roomCode: "2A" },
-    { x: 490, y: 220, roomName: "The Funhouse", roomCode: "2B" },
-    { x: 790, y: 220, roomName: "The Containment Room", roomCode: "2C" },
+    { x: 190, y: 220 + MONSTER_Y_OFFSET, roomName: "The Butcher's Pantry", roomCode: "2A" },
+    { x: 490, y: 220 + MONSTER_Y_OFFSET, roomName: "The Funhouse", roomCode: "2B" },
+    { x: 790, y: 220 + MONSTER_Y_OFFSET, roomName: "The Containment Room", roomCode: "2C" },
   ],
   3: [
-    { x: 190, y: 220, roomName: "The Doll Parlour", roomCode: "3A" },
-    { x: 490, y: 220, roomName: "The Mascot Lounge", roomCode: "3B" },
-    { x: 790, y: 220, roomName: "The Long Gallery", roomCode: "3C" },
+    { x: 190, y: 220 + MONSTER_Y_OFFSET, roomName: "The Doll Parlour", roomCode: "3A" },
+    { x: 490, y: 220 + MONSTER_Y_OFFSET, roomName: "The Mascot Lounge", roomCode: "3B" },
+    { x: 790, y: 220 + MONSTER_Y_OFFSET, roomName: "The Long Gallery", roomCode: "3C" },
   ],
 };
 
@@ -74,22 +78,12 @@ const MONSTERS = [Butcher, CreepyClown, FleshMass, HauntedDoll, HauntedMascot, T
 
 const DECOR = {
   candelabra: "Environment/Decoroations/Candelabra.png",
-  candyCorn: "Environment/Decoroations/Candy corn pile.png",
-  cauldron: "Environment/Decoroations/Cauldron.png",
-  crystalBall: "Environment/Decoroations/Crystal ball.png",
-  clock: "Environment/Decoroations/grandfather clock.png",
   jackOLantern: "Environment/Decoroations/Jack-o-lantern.png",
-  piratePumpkin: "Environment/Decoroations/Jackolantern Pirate.png",
-  mirror: "Environment/Decoroations/Mirror.png",
-  scarecrow: "Environment/Decoroations/Scarecrow.png",
   skeleton: "Environment/Decoroations/Skeleton.png",
-  orb: "Environment/Decoroations/orb.png",
-  phone: "Environment/Decoroations/rotary phone.png",
-  trophy: "Environment/Decoroations/trophy.png",
 };
 
 const ASSETS = {
-  receptionist: `${ASSET_ROOT}/Receptionist/receptionist.png`,
+  receptionist: `${ASSET_ROOT}/Monsters/weeping_nun_idle.gif`,
   playerStill: `${ASSET_ROOT}/Player/still.png`,
   playerWalkNorth: `${ASSET_ROOT}/Player/walk/north.png`,
   playerWalkSouth: `${ASSET_ROOT}/Player/walk/south.png`,
@@ -151,6 +145,8 @@ function makeMusicDirector() {
     },
   };
 }
+
+const mansionMusicDirector = makeMusicDirector();
 
 function loadImage(src) {
   return new Promise((resolve) => {
@@ -270,6 +266,8 @@ function drawStairs(ctx) {
 
 function drawDesk(ctx) {
   // Reception counter remains solid and walk-blocking, using the shared mansion palette.
+  ctx.save();
+  ctx.translate(FOYER_X_OFFSET, 0);
   ctx.fillStyle = "rgba(0, 0, 0, .42)"; ctx.fillRect(344, 244, 240, 32);
   ctx.fillStyle = PALETTE.graveyardBlack; ctx.fillRect(350, 204, 224, 64);
   ctx.fillStyle = PALETTE.cementGray; ctx.fillRect(347, 201, 230, 12);
@@ -283,6 +281,7 @@ function drawDesk(ctx) {
   ctx.fillStyle = PALETTE.gold; ctx.fillRect(493, 186, 4, 10); ctx.fillRect(485, 194, 20, 3);
   ctx.fillStyle = PALETTE.moonlight; ctx.font = "bold 10px monospace"; ctx.textAlign = "center"; ctx.fillText("RECEPTION", 462, 241);
   ctx.fillStyle = PALETTE.gold; ctx.fillRect(415, 220, 16, 5); ctx.fillRect(438, 220, 8, 5);
+  ctx.restore();
 }
 
 function drawWallPlaque(ctx, x, y, title, code) {
@@ -296,9 +295,305 @@ function drawReceptionistImage(ctx, image, x, feetY) {
   ctx.fillStyle = "rgba(0, 0, 0, .28)";
   ctx.beginPath(); ctx.ellipse(x, feetY + 1, 22, 5, 0, 0, Math.PI * 2); ctx.fill();
   ctx.imageSmoothingEnabled = false;
-  ctx.drawImage(image, x - 36, feetY - 74, 72, 74);
+  ctx.drawImage(image, x - 44, feetY - 96, 88, 96);
 }
 
+
+function drawCobweb(ctx, x, y, size = 30, flipX = false, flipY = false) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(flipX ? -1 : 1, flipY ? -1 : 1);
+  ctx.strokeStyle = "rgba(205, 211, 190, .62)";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(0, 0); ctx.lineTo(size, 0);
+  ctx.moveTo(0, 0); ctx.lineTo(0, size);
+  ctx.moveTo(0, 0); ctx.lineTo(size * .72, size * .72);
+  for (let i = 1; i <= 4; i += 1) {
+    const d = size * i / 5;
+    ctx.beginPath(); ctx.moveTo(d, 0); ctx.quadraticCurveTo(d * .6, d * .6, 0, d);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function drawBloodDrips(ctx, x, y, width = 34, height = 18) {
+  // A restrained wall stain, used as one accent near a room's trim rather than everywhere.
+  ctx.fillStyle = "#54151b";
+  ctx.fillRect(x, y, width, 4);
+  const drips = [Math.round(width * .18), Math.round(width * .48), Math.round(width * .79)];
+  drips.forEach((offset, index) => {
+    const length = height * ([.75, 1, .55][index]);
+    ctx.fillRect(x + offset, y + 2, 3, length);
+    ctx.fillStyle = "#751d25";
+    ctx.fillRect(x + offset, y + length, 3, 3);
+    ctx.fillStyle = "#54151b";
+  });
+}
+
+// Floor blood is used as a small scene marker near a body or damaged area, not as a full-floor texture.
+function drawBloodPool(ctx, x, y, width = 44, height = 15) {
+  ctx.save();
+  ctx.fillStyle = "rgba(17, 4, 7, .62)";
+  ctx.beginPath(); ctx.ellipse(x + 2, y + 3, width * .52, height * .43, -.08, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "#54151b";
+  ctx.beginPath(); ctx.ellipse(x, y, width * .5, height * .48, .05, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "#7d1723";
+  ctx.beginPath(); ctx.ellipse(x - width * .12, y - 1, width * .28, height * .25, -.12, 0, Math.PI * 2); ctx.fill();
+  // Three short droplets point toward the scene, like a small trail rather than random splashes.
+  ctx.fillStyle = "#54151b";
+  ctx.fillRect(x + width * .39, y - height * .28, 3, 4);
+  ctx.fillRect(x + width * .48, y + height * .02, 2, 3);
+  ctx.fillRect(x - width * .53, y + height * .18, 3, 2);
+  ctx.restore();
+}
+
+// A stylized, non-graphic pixel-art corpse. The pose stays horizontal so it reads as a body on the floor.
+// Place it against a room edge or beside a stain; avoid the monster's center and the main walking line.
+function drawCorpse(ctx, x, y, scale = 1, flipped = false) {
+  drawBloodPool(ctx, x, y + 2 * scale, 49 * scale, 15 * scale);
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(flipped ? -scale : scale, scale);
+  ctx.fillStyle = "rgba(0, 0, 0, .38)";
+  ctx.beginPath(); ctx.ellipse(1, 3, 24, 7, 0, 0, Math.PI * 2); ctx.fill();
+  // Head and face.
+  ctx.fillStyle = "#242126"; ctx.fillRect(-22, -10, 12, 10);
+  ctx.fillStyle = "#b7b19e"; ctx.fillRect(-20, -11, 9, 8); ctx.fillRect(-18, -4, 7, 3);
+  ctx.fillStyle = "#24171a"; ctx.fillRect(-19, -8, 2, 2); ctx.fillRect(-14, -8, 2, 2);
+  // Torn coat and one pale arm.
+  ctx.fillStyle = "#34252a"; ctx.fillRect(-12, -9, 21, 12); ctx.fillRect(-8, 2, 13, 3);
+  ctx.fillStyle = "#8a252d"; ctx.fillRect(-4, -7, 6, 8); ctx.fillRect(4, -5, 3, 5);
+  ctx.fillStyle = "#b7b19e"; ctx.fillRect(-12, -4, 5, 11); ctx.fillRect(-15, 4, 7, 3);
+  // Bent legs and dark shoes.
+  ctx.fillStyle = "#1b1a20"; ctx.fillRect(7, -3, 11, 6); ctx.fillRect(14, 1, 10, 5);
+  ctx.fillStyle = "#101014"; ctx.fillRect(16, 4, 10, 4); ctx.fillRect(2, 1, 8, 4);
+  ctx.fillStyle = "rgba(205, 211, 190, .55)"; ctx.fillRect(-18, -10, 4, 1); ctx.fillRect(-1, -7, 3, 2);
+  ctx.restore();
+}
+
+function drawFoyerSideTable(ctx, images, x) {
+  ctx.fillStyle = "rgba(0, 0, 0, .36)";
+  ctx.fillRect(x - 48, 225, 96, 7);
+  ctx.fillStyle = PALETTE.graveyardBlack;
+  ctx.fillRect(x - 43, 181, 86, 47);
+  ctx.fillStyle = PALETTE.cementGray;
+  ctx.fillRect(x - 47, 177, 94, 8);
+  ctx.fillStyle = PALETTE.forestGreen;
+  ctx.fillRect(x - 39, 187, 78, 4);
+  ctx.fillRect(x - 35, 228, 7, 24);
+  ctx.fillRect(x + 28, 228, 7, 24);
+  if (images.candelabra) {
+    ctx.drawImage(images.candelabra, x - 38, 139, 24, 36);
+    ctx.drawImage(images.candelabra, x + 14, 139, 24, 36);
+  }
+  if (images.jackOLantern) ctx.drawImage(images.jackOLantern, x - 14, 148, 28, 28);
+}
+
+function drawRoomDecorations(ctx, images, room, roomX, roomWidth) {
+  const id = room.monster?.id;
+  if (id === "Butcher") {
+    drawSheetCrop(ctx, images.tilesetDressers, 35, 5, 41, 46, roomX + 16, 137, 40, 45);
+    drawSheetCrop(ctx, images.tilesetBoxes, 1, 0, 31, 18, roomX + 60, 160, 31, 18);
+    drawHangingChain(ctx, roomX + 116, 119, 8);
+    drawBloodDrips(ctx, roomX + 19, 119, 34, 23);
+    drawBloodSpatter(ctx, roomX + 58, 169, .8);
+    drawSkullAndBones(ctx, roomX + 87, 144, .78);
+    drawBloodPool(ctx, roomX + 108, 221, 39, 12);
+    drawCorpse(ctx, roomX + 103, 229, .55, false);
+  } else if (id === "CreepyClown") {
+    drawSheetCrop(ctx, images.tilesetSofas, 128, 28, 48, 34, roomX + 17, 163, 60, 43);
+    drawBloodDrips(ctx, roomX + 194, 119, 32, 23);
+    drawBloodSpatter(ctx, roomX + 183, 157, .9);
+    drawClawMarks(ctx, roomX + 188, 176, 18);
+    drawCobweb(ctx, roomX + roomWidth - 18, 112, 22, true, false);
+    drawCorpse(ctx, roomX + 43, 228, .56, false);
+  } else if (id === "FleshMass") {
+    drawSheetCrop(ctx, images.tilesetDressers, 0, 53, 42, 42, roomX + 16, 148, 43, 43);
+    drawSheetCrop(ctx, images.tilesetBoxes, 0, 17, 32, 15, roomX + 61, 171, 30, 15);
+    drawHangingChain(ctx, roomX + 21, 115, 10);
+    drawHangingChain(ctx, roomX + 226, 115, 10);
+    drawBloodDrips(ctx, roomX + 188, 119, 33, 24);
+    drawBloodSpatter(ctx, roomX + 194, 168, .95);
+    drawRitualMark(ctx, roomX + 215, 207, 15);
+    drawBloodPool(ctx, roomX + 196, 226, 42, 13);
+    drawCorpse(ctx, roomX + 188, 229, .58, true);
+  } else if (id === "HauntedDoll") {
+    drawSheetCrop(ctx, images.tilesetDressers, 35, 5, 41, 46, roomX + 193, 151, 38, 43);
+    drawSheetCrop(ctx, images.tilesetLibrary, 0, 0, 47, 35, roomX + 151, 151, 39, 29);
+    drawRitualMark(ctx, roomX + 60, 211, 17);
+    drawCobweb(ctx, roomX + 17, 112, 23, false, false);
+    drawBloodDrips(ctx, roomX + 194, 119, 30, 21);
+    drawSkullAndBones(ctx, roomX + 202, 211, .7);
+    drawCorpse(ctx, roomX + 218, 229, .58, true);
+  } else if (id === "HauntedMascot") {
+    drawSheetCrop(ctx, images.tilesetSofas, 128, 28, 48, 34, roomX + 17, 163, 60, 43);
+    drawClawMarks(ctx, roomX + 102, 128, 20);
+    drawHangingChain(ctx, roomX + 223, 119, 6);
+    drawBloodDrips(ctx, roomX + 193, 119, 29, 22);
+    drawBloodSpatter(ctx, roomX + 190, 187, .85);
+    drawCorpse(ctx, roomX + 207, 228, .58, true);
+  } else if (id === "TallStranger") {
+    drawSheetCrop(ctx, images.tilesetFireplace, 0, 0, 48, 80, roomX + 15, 124, 43, 72);
+    drawSheetCrop(ctx, images.tilesetLibrary, 48, 64, 64, 55, roomX + 187, 138, 43, 45);
+    drawClawMarks(ctx, roomX + 87, 135, 25);
+    drawCobweb(ctx, roomX + roomWidth - 18, 112, 24, true, false);
+    drawBloodDrips(ctx, roomX + 194, 119, 30, 22);
+    drawCorpse(ctx, roomX + 84, 229, .58, false);
+    drawBloodSpatter(ctx, roomX + 77, 205, .7);
+  }
+}
+
+function drawClawMarks(ctx, x, y, length = 25) {
+  ctx.save();
+  ctx.strokeStyle = "#24181b"; ctx.lineWidth = 3; ctx.lineCap = "square";
+  for (let i = 0; i < 3; i += 1) {
+    ctx.beginPath(); ctx.moveTo(x + i * 7, y); ctx.lineTo(x + i * 7 + 5, y + length); ctx.stroke();
+    ctx.strokeStyle = "rgba(130, 31, 39, .85)";
+  }
+  ctx.restore();
+}
+
+
+function drawHangingChain(ctx, x, y, links = 7) {
+  ctx.strokeStyle = "rgba(183, 183, 183, .65)"; ctx.lineWidth = 2;
+  for (let i = 0; i < links; i += 1) {
+    ctx.beginPath(); ctx.ellipse(x, y + i * 8, 4, 6, i % 2 ? Math.PI / 2 : 0, 0, Math.PI * 2); ctx.stroke();
+  }
+}
+
+function drawRitualMark(ctx, x, y, radius = 22) {
+  ctx.strokeStyle = "rgba(117, 29, 37, .72)"; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(x, y, radius, 0, Math.PI * 2); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x - radius, y); ctx.lineTo(x + radius, y); ctx.moveTo(x, y - radius); ctx.lineTo(x, y + radius); ctx.stroke();
+}
+
+function drawSkullAndBones(ctx, x, y, scale = 1) {
+  ctx.fillStyle = "rgba(210, 201, 179, .86)";
+  ctx.beginPath(); ctx.arc(x, y, 7 * scale, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = PALETTE.graveyardBlack;
+  ctx.fillRect(x - 3 * scale, y - 2 * scale, 2 * scale, 3 * scale);
+  ctx.fillRect(x + 1 * scale, y - 2 * scale, 2 * scale, 3 * scale);
+  ctx.strokeStyle = "rgba(210, 201, 179, .86)"; ctx.lineWidth = 2 * scale;
+  ctx.beginPath(); ctx.moveTo(x - 12 * scale, y + 8 * scale); ctx.lineTo(x + 12 * scale, y + 8 * scale); ctx.stroke();
+}
+
+function drawBloodSpatter(ctx, x, y, scale = 1) {
+  ctx.fillStyle = "rgba(117, 29, 37, .78)";
+  for (const [dx, dy, radius] of [[0, 0, 4], [11, -5, 2], [-9, 6, 2], [16, 8, 1]]) {
+    ctx.beginPath(); ctx.arc(x + dx * scale, y + dy * scale, radius * scale, 0, Math.PI * 2); ctx.fill();
+  }
+}
+
+
+// Draws one animated, pixel-style bat. The wing angle changes every frame.
+function drawBat(ctx, x, y, scale, flap) {
+  ctx.save();
+  ctx.translate(Math.round(x), Math.round(y));
+  ctx.scale(scale, scale);
+  ctx.fillStyle = "#100d16";
+  ctx.beginPath();
+  ctx.moveTo(0, 1);
+  ctx.lineTo(-5, -2 - flap * 5);
+  ctx.lineTo(-13, -8 - flap * 3);
+  ctx.lineTo(-12, 0);
+  ctx.lineTo(-20, -3 - flap * 2);
+  ctx.lineTo(-17, 7);
+  ctx.lineTo(-8, 5);
+  ctx.lineTo(0, 9);
+  ctx.lineTo(8, 5);
+  ctx.lineTo(17, 7);
+  ctx.lineTo(20, -3 - flap * 2);
+  ctx.lineTo(12, 0);
+  ctx.lineTo(13, -8 - flap * 3);
+  ctx.lineTo(5, -2 - flap * 5);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle = "#1b1520";
+  ctx.fillRect(-3, -3, 6, 12);
+  ctx.fillStyle = "#8e2634";
+  ctx.fillRect(-3, 0, 2, 2);
+  ctx.fillRect(2, 0, 2, 2);
+  ctx.fillStyle = "#100d16";
+  ctx.beginPath();
+  ctx.moveTo(-3, -2); ctx.lineTo(-4, -7); ctx.lineTo(0, -3);
+  ctx.moveTo(3, -2); ctx.lineTo(4, -7); ctx.lineTo(0, -3);
+  ctx.fill();
+  ctx.restore();
+}
+
+// Eight bats circle across the upper rooms and swoop into the halls.
+// Speed, height, and spacing live in this one helper so the flock is easy to tune.
+function drawFlyingBats(ctx, timestamp, floor) {
+  const bats = [
+    { start: 28, speed: .030, baseY: 112, size: .70, direction: 1 },
+    { start: 170, speed: .023, baseY: 164, size: .85, direction: -1 },
+    { start: 315, speed: .034, baseY: 130, size: .76, direction: 1 },
+    { start: 455, speed: .026, baseY: 205, size: .94, direction: -1 },
+    { start: 600, speed: .032, baseY: 145, size: .72, direction: 1 },
+    { start: 730, speed: .021, baseY: 190, size: .88, direction: -1 },
+    { start: 850, speed: .036, baseY: 122, size: .68, direction: 1 },
+    { start: 940, speed: .025, baseY: 240, size: .80, direction: -1 },
+  ];
+  const flightRange = WORLD.width + 64;
+  bats.forEach((bat, index) => {
+    const travelled = bat.start + timestamp * bat.speed * bat.direction;
+    const wrapped = ((travelled % flightRange) + flightRange) % flightRange;
+    const x = wrapped - 32;
+    const lowerSwoop = floor === 1 ? 15 : 28;
+    const y = bat.baseY + Math.sin(timestamp / 310 + index * 1.7) * lowerSwoop;
+    const flap = Math.sin(timestamp / 78 + index * 2.2);
+    drawBat(ctx, x, y, bat.size, flap);
+  });
+}
+
+function drawReferenceDecorations(ctx, images, floor) {
+  if (floor === 1) {
+    drawSkullAndBones(ctx, 143, 404, .92);
+    drawBloodDrips(ctx, 111, 382, 36, 22);
+    drawBloodPool(ctx, 187, 463, 37, 13);
+    drawBloodSpatter(ctx, 178, 443, .85);
+    drawBloodDrips(ctx, 763, 305, 38, 24);
+    drawBloodSpatter(ctx, 752, 334, 1.05);
+    drawClawMarks(ctx, 218, 392, 22);
+    drawRitualMark(ctx, 700, 430, 18);
+    drawSkullAndBones(ctx, 680, 472, .7);
+    drawCobweb(ctx, 58, 292, 27, false, true);
+    drawCobweb(ctx, 900, 292, 27, true, true);
+    drawHangingChain(ctx, 230, 200, 8);
+    drawHangingChain(ctx, 730, 200, 8);
+    return;
+  }
+
+  const roomX = [55, 355, 670];
+  const roomWidth = [270, 270, 238];
+  roomX.forEach((x, index) => {
+    drawSconce(ctx, x + 43, 86);
+    drawSconce(ctx, x + roomWidth[index] - 36, 86);
+  });
+  drawBloodDrips(ctx, 449, 272, 48, 17);
+  drawBloodDrips(ctx, 752, 272, 43, 16);
+  drawBloodSpatter(ctx, 452, 291, .9);
+  drawBloodSpatter(ctx, 760, 292, .85);
+  drawClawMarks(ctx, 188, 328, 24);
+  drawRitualMark(ctx, 804, 432, 18);
+  drawCobweb(ctx, 58, 292, 27, false, true);
+  drawCobweb(ctx, 900, 292, 27, true, true);
+  drawHangingChain(ctx, 50, 294, 8);
+  drawHangingChain(ctx, 900, 294, 8);
+  drawSkullAndBones(ctx, 285, 419, .72);
+  drawSkullAndBones(ctx, 589, 419, .72);
+  if (images.skeleton) {
+    ctx.drawImage(images.skeleton, 78, 314, 18, 26);
+    ctx.drawImage(images.skeleton, 875, 314, 18, 26);
+  }
+  drawBloodPool(ctx, 155, 475, 36, 12);
+  drawBloodPool(ctx, 693, 475, 36, 12);
+  drawBloodSpatter(ctx, 179, 454, .8);
+  drawBloodSpatter(ctx, 716, 454, .8);
+}
+
+// PlaceHolder incase Nun does not load
 function drawGhostReceptionist(ctx, x, feetY, t) {
   const bob = Math.sin(t / 280) * 2;
   ctx.fillStyle = "rgba(6, 4, 12, .28)"; ctx.beginPath(); ctx.ellipse(x, feetY + 1, 19, 5, 0, 0, Math.PI * 2); ctx.fill();
@@ -326,7 +621,7 @@ function renderBackground(floor, images) {
   drawBrickWall(ctx, 907, 31, 25, 525); // east wall
   drawBrickWall(ctx, 28, 536, 904, 23); // south wall
 
-  drawWindow(ctx, 98, 39, 45, 37); drawWindow(ctx, 454, 39, 45, 37); drawWindow(ctx, 818, 39, 45, 37);
+  drawWindow(ctx, 174, 39, 45, 37); drawWindow(ctx, 753, 39, 45, 37);
   drawSconce(ctx, 202, 51); drawSconce(ctx, 746, 51);
   drawPortraitFrame(ctx, images.HauntedDollPortrait, 266, 36, 28);
   drawPortraitFrame(ctx, images.CreepyClownPortrait, 660, 36, 28);
@@ -341,41 +636,25 @@ function renderBackground(floor, images) {
 
   if (floor === 1) {
     // Grand foyer: entrance carpet, reception desk and richly decorated side tables.
-    ctx.fillStyle = PALETTE.graveyardBlack; ctx.fillRect(393, 283, 140, 212);
-    ctx.fillStyle = PALETTE.forestGreen; ctx.fillRect(399, 289, 128, 200);
-    ctx.fillStyle = PALETTE.graveyardBlack; ctx.fillRect(404, 295, 118, 188);
-    ctx.fillStyle = PALETTE.graveyardBlack; ctx.fillRect(410, 301, 106, 176);
-    for (let y = 306; y < 475; y += 16) { ctx.fillStyle = "rgba(166, 216, 84, .20)"; ctx.fillRect(418, y, 90, 2); }
-    ctx.strokeStyle = PALETTE.gold; ctx.lineWidth = 2; ctx.strokeRect(415, 307, 96, 164);
-    ctx.fillStyle = PALETTE.graveyardBlack; ctx.fillRect(310, 103, 308, 43);
-    ctx.fillStyle = PALETTE.cementGray; ctx.fillRect(315, 108, 298, 33);
-    ctx.fillStyle = PALETTE.forestGreen; ctx.fillRect(319, 112, 290, 25);
-    ctx.fillStyle = PALETTE.moonlight; ctx.textAlign = "center"; ctx.font = "bold 15px Georgia"; ctx.fillText("HAUNTED CORPS", 464, 129);
-    ctx.fillStyle = PALETTE.gold; ctx.font = "9px monospace"; ctx.fillText("VISITOR SERVICES  ·  EST. 1897", 464, 156);
+    ctx.fillStyle = PALETTE.graveyardBlack; ctx.fillRect(FOYER_CENTER_X - 70, 283, 140, 212);
+    ctx.fillStyle = PALETTE.forestGreen; ctx.fillRect(FOYER_CENTER_X - 64, 289, 128, 200);
+    ctx.fillStyle = PALETTE.graveyardBlack; ctx.fillRect(FOYER_CENTER_X - 59, 295, 118, 188);
+    ctx.fillStyle = PALETTE.graveyardBlack; ctx.fillRect(FOYER_CENTER_X - 53, 301, 106, 176);
+    for (let y = 306; y < 475; y += 16) { ctx.fillStyle = "rgba(166, 216, 84, .20)"; ctx.fillRect(FOYER_CENTER_X - 62, y, 90, 2); }
+    ctx.strokeStyle = PALETTE.gold; ctx.lineWidth = 2; ctx.strokeRect(FOYER_CENTER_X - 48, 307, 96, 164);
+    ctx.fillStyle = PALETTE.graveyardBlack; ctx.fillRect(FOYER_CENTER_X - 154, 36, 308, 43);
+    ctx.fillStyle = PALETTE.cementGray; ctx.fillRect(FOYER_CENTER_X - 149, 41, 298, 33);
+    ctx.fillStyle = PALETTE.forestGreen; ctx.fillRect(FOYER_CENTER_X - 145, 45, 290, 25);
+    ctx.fillStyle = PALETTE.moonlight; ctx.textAlign = "center"; ctx.font = "bold 15px Georgia";
+    ctx.fillText("HAUNTED CORPS", FOYER_CENTER_X, 62);
+    ctx.fillStyle = PALETTE.gold; ctx.font = "9px monospace"; ctx.fillText("VISITOR SERVICES  ·  EST. 1897", FOYER_CENTER_X, 90);
     drawDesk(ctx);
-    drawDoor(ctx, 447, 505, 63, true);
-    ctx.fillStyle = PALETTE.moonlight; ctx.font = "bold 9px monospace"; ctx.fillText("MAIN ENTRANCE", 480, 499);
+    drawDoor(ctx, FOYER_CENTER_X - 32, 505, 64, true);
+    ctx.fillStyle = PALETTE.moonlight; ctx.font = "bold 9px monospace"; ctx.fillText("MAIN ENTRANCE", FOYER_CENTER_X, 499);
     drawStairs(ctx);
-    drawPortraitFrame(ctx, images.ButcherPortrait, 105, 133, 43);
-    drawPortraitFrame(ctx, images.TallStrangerPortrait, 801, 133, 43);
-    drawPortraitFrame(ctx, images.HauntedMascotPortrait, 105, 285, 43);
-    drawPortraitFrame(ctx, images.FleshMassPortrait, 801, 285, 43);
-    ctx.fillStyle = PALETTE.graveyardBlack; ctx.fillRect(104, 365, 120, 86); ctx.fillRect(742, 365, 120, 86);
-    ctx.fillStyle = PALETTE.cementGray; ctx.fillRect(100, 360, 128, 9); ctx.fillRect(738, 360, 128, 9);
-    ctx.fillStyle = PALETTE.forestGreen; ctx.fillRect(112, 371, 104, 4); ctx.fillRect(750, 371, 104, 4);
-    if (images.crystalBall) ctx.drawImage(images.crystalBall, 143, 325, 36, 36);
-    if (images.phone) ctx.drawImage(images.phone, 780, 330, 48, 16);
-    if (images.clock) ctx.drawImage(images.clock, 240, 404, 24, 72);
-    if (images.candelabra) { ctx.drawImage(images.candelabra, 294, 438, 30, 41); ctx.drawImage(images.candelabra, 637, 438, 30, 41); }
-    if (images.cauldron) ctx.drawImage(images.cauldron, 581, 411, 31, 27);
-    if (images.jackOLantern) ctx.drawImage(images.jackOLantern, 332, 468, 34, 34);
-    if (images.trophy) ctx.drawImage(images.trophy, 696, 473, 32, 32);
-    if (images.scarecrow) ctx.drawImage(images.scarecrow, 158, 302, 40, 46);
-    if (images.candyCorn) ctx.drawImage(images.candyCorn, 210, 456, 31, 29);
-    if (images.piratePumpkin) ctx.drawImage(images.piratePumpkin, 686, 405, 42, 34);
-    if (images.orb) ctx.drawImage(images.orb, 756, 458, 28, 28);
-    drawSheetCrop(ctx, images.tilesetSofas, 128, 62, 48, 34, 749, 378, 66, 46);
-    ctx.fillStyle = PALETTE.moonlight; ctx.font = "10px monospace"; ctx.textAlign = "center"; ctx.fillText("Please check in at reception", 462, 178);
+    drawFoyerSideTable(ctx, images, 270);
+    drawFoyerSideTable(ctx, images, 690);
+    ctx.fillStyle = PALETTE.moonlight; ctx.font = "10px monospace"; ctx.textAlign = "center"; ctx.fillText("Please check in at reception", FOYER_CENTER_X, 115);
   } else {
     // Three individual monster rooms open onto a shared corridor. Door gaps stay walkable.
     const roomCenters = [190, 490, 790];
@@ -391,26 +670,9 @@ function renderBackground(floor, images) {
       // Green room trim and moonlight medallion keep rooms distinct without changing floor color.
       ctx.fillStyle = "rgba(166, 216, 84, .18)"; ctx.fillRect(roomX + 40, 129, roomWidth - 90, 3); ctx.fillRect(roomX + 40, 219, roomWidth - 90, 3);
       ctx.strokeStyle = "rgba(230, 245, 183, .35)"; ctx.beginPath(); ctx.ellipse(roomX + roomWidth / 2, 176, Math.min(54, roomWidth / 4.7), 34, 0, 0, Math.PI * 2); ctx.stroke();
-      drawWallPlaque(ctx, roomCenters[index], 83, room.monster?.name || "Employee", room.roomCode);
+      drawWallPlaque(ctx, roomCenters[index], 83 + MONSTER_Y_OFFSET, room.monster?.name || "Employee", room.roomCode);
       drawDoor(ctx, roomCenters[index] - 23, 255, 46, false);
-      drawSconce(ctx, roomX + 43, 86); drawSconce(ctx, roomX + roomWidth - 36, 86);
-      if (room.monster?.id === "Butcher") {
-        // The pantry gets a closed cabinet from the supplied tables/dressers atlas.
-        drawSheetCrop(ctx, images.tilesetDressers, 35, 5, 41, 46, roomX + 20, 153, 43, 48);
-        drawSheetCrop(ctx, images.tilesetBoxes, 1, 0, 31, 18, roomX + 209, 174, 36, 21);
-      } else if (room.monster?.id === "CreepyClown" || room.monster?.id === "HauntedMascot") {
-        // A deep green sofa adds a different silhouette to each performance room.
-        drawSheetCrop(ctx, images.tilesetSofas, 128, 28, 48, 34, roomX + 20, 176, 65, 46);
-      } else if (room.monster?.id === "FleshMass") {
-        drawSheetCrop(ctx, images.tilesetDressers, 0, 53, 42, 42, roomX + 18, 163, 47, 47);
-        drawSheetCrop(ctx, images.tilesetBoxes, 0, 17, 32, 15, roomX + 208, 181, 36, 18);
-      } else if (room.monster?.id === "HauntedDoll") {
-        drawSheetCrop(ctx, images.tilesetDressers, 35, 5, 41, 46, roomX + 20, 153, 43, 48);
-        drawSheetCrop(ctx, images.tilesetLibrary, 0, 0, 47, 35, roomX + 202, 148, 44, 34);
-      } else if (room.monster?.id === "TallStranger") {
-        drawSheetCrop(ctx, images.tilesetLibrary, 48, 64, 64, 55, roomX + 159, 137, 63, 54);
-        drawSheetCrop(ctx, images.tilesetFireplace, 0, 0, 48, 80, roomX + 17, 125, 47, 79);
-      }
+      drawRoomDecorations(ctx, images, room, roomX, roomWidth);
     });
     // Corridor runner, wall line, and stair landing.
     ctx.fillStyle = PALETTE.graveyardBlack; ctx.fillRect(55, 285, 850, 111);
@@ -429,11 +691,7 @@ function renderBackground(floor, images) {
     if (images.candelabra) { ctx.drawImage(images.candelabra, 108, 409, 27, 37); ctx.drawImage(images.candelabra, 727, 409, 27, 37); }
     drawSheetCrop(ctx, images.tilesetSofas, 128, 28, 48, 34, 245, 407, 61, 43);
     drawSheetCrop(ctx, images.tilesetSofas, 128, 62, 48, 34, 550, 407, 61, 43);
-    if (images.mirror) { ctx.drawImage(images.mirror, 412, 404, 32, 43); ctx.drawImage(images.mirror, 619, 404, 32, 43); }
     if (images.skeleton) ctx.drawImage(images.skeleton, 855, 425, 20, 29);
-    if (images.orb) ctx.drawImage(images.orb, 765, 462, 28, 28);
-    if (images.candyCorn) ctx.drawImage(images.candyCorn, 331, 465, 28, 25);
-    if (images.piratePumpkin && floor === 3) ctx.drawImage(images.piratePumpkin, 588, 422, 38, 31);
     drawStairs(ctx);
     ctx.fillStyle = PALETTE.moonlight; ctx.font = "bold 10px monospace"; ctx.textAlign = "left";
     ctx.fillText(floor === 2 ? "PORTRAIT WING  /  FLOOR II" : "MIDNIGHT WING  /  FLOOR III", 72, 518);
@@ -442,6 +700,7 @@ function renderBackground(floor, images) {
     ctx.fillStyle = PALETTE.forestGreen; ctx.fillRect(344, 70, 13, 4); ctx.fillRect(644, 70, 13, 4);
   }
 
+  drawReferenceDecorations(ctx, images, floor);
   // Cobweb-free silhouettes and common dressing keep every floor visually distinct and readable.
   ctx.fillStyle = "rgba(0, 0, 0, .35)"; ctx.fillRect(56, 83, 3, 432); ctx.fillRect(901, 83, 3, 432);
   return offscreen;
@@ -451,7 +710,7 @@ function playerBlocked(nextX, nextY, floor, openedRooms, currentY = nextY) {
   if (nextX < 65 || nextX > 895 || nextY < 92 || nextY > 525) return true;
   if (floor === 1) {
     // Reception counter and side furniture.
-    if (nextX > 342 && nextX < 581 && nextY > 199 && nextY < 278) return true;
+    if (nextX > 360 && nextX < 599 && nextY > 199 && nextY < 278) return true;
     if (nextX > 95 && nextX < 236 && nextY > 355 && nextY < 385) return true;
     if (nextX > 731 && nextX < 874 && nextY > 355 && nextY < 385) return true;
     return false;
@@ -472,15 +731,15 @@ function playerBlocked(nextX, nextY, floor, openedRooms, currentY = nextY) {
 function findNearby(player, floor, openedRooms) {
   const candidates = [];
   if (floor === 1) {
-    candidates.push({ id: "reception", type: "reception", label: "Reception desk", hint: "Talk to the receptionist", x: 462, y: 258, radius: 78 });
+    candidates.push({ id: "reception", type: "reception", label: "Reception desk", hint: "Talk to the receptionist", x: FOYER_CENTER_X, y: 258, radius: 78 });
   } else {
     MONSTER_ROOM_LAYOUT[floor].forEach((room) => {
       const monster = MONSTERS.find((m) => m.floor === floor && m.roomCode === room.roomCode);
       if (!monster) return;
       if (!openedRooms[room.roomCode]) {
-        candidates.push({ id: `door-${room.roomCode}`, type: "door", roomCode: room.roomCode, roomName: room.roomName, label: `${room.roomCode} · ${room.roomName}`, hint: "Open room door", x: room.x, y: 268, radius: 54 });
+        candidates.push({ id: `door-${room.roomCode}`, type: "door", roomCode: room.roomCode, roomName: room.roomName, label: `${room.roomCode} · ${room.roomName}`, hint: "Open room door", x: room.x, y: 268 + MONSTER_Y_OFFSET, radius: 54 });
       } else {
-        candidates.push({ id: monster.id, type: "monster", monster, label: monster.name, hint: "Talk to employee", x: room.x, y: 218, radius: 42 });
+        candidates.push({ id: monster.id, type: "monster", monster, label: monster.name, hint: "Talk to employee", x: room.x, y: 218 + MONSTER_Y_OFFSET, radius: 42 });
       }
     });
   }
@@ -686,6 +945,8 @@ function MansionCanvas({ floor, onNearbyChange, pausedRef, interactRef, onFloorC
         context.fillStyle = PALETTE.graveyardBlack; context.fillRect(0, 0, WORLD.width, WORLD.height);
         context.fillStyle = PALETTE.cementGray; context.fillRect(40, 55, 880, 490);
       }
+      // Bats are redrawn each animation frame, so their wings flap and their flight paths move.
+      drawFlyingBats(context, timestamp, game.floor);
       if (game.floor === 1) {
         const receptionistImage = imagesRef.current.receptionist;
         if (receptionistImage) drawReceptionistImage(context, receptionistImage, 462, 201);
@@ -788,18 +1049,31 @@ function HauntedMansion({ onOpenDashboard }) {
   const [nearby, setNearby] = useState(null);
   const [dialogue, setDialogue] = useState(null);
   const [activeCard, setActiveCard] = useState(null);
+  const [monsterAnalytics, setMonsterAnalytics] = useState([]);
   const [openedRooms, setOpenedRooms] = useState({});
   const openedRoomsRef = useRef(openedRooms);
   const openRoomRef = useRef(null);
   const musicStatus = "loop-ready";
-  const musicRef = useRef(null);
+  const musicRef = useRef(mansionMusicDirector);
   const pausedRef = useRef({ current: false, onEscape: null });
   const interactRef = useRef(null);
 
   useEffect(() => {
-    const director = makeMusicDirector();
-    musicRef.current = director;
-    return () => { director.destroy(); musicRef.current = null; };
+    let cancelled = false;
+    fetch(`${API_URL}/analytics/monsters`)
+      .then((response) => {
+        if (!response.ok) throw new Error("Unable to load monster analytics");
+        return response.json();
+      })
+      .then((analytics) => {
+        if (!cancelled) setMonsterAnalytics(analytics);
+      })
+      .catch((error) => {
+        console.error("Failed to load mansion monster analytics:", error);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const closePanels = useCallback(() => { setDialogue(null); setActiveCard(null); }, []);
@@ -825,6 +1099,17 @@ function HauntedMansion({ onOpenDashboard }) {
 
   const floorName = floor === 1 ? "Grand Foyer" : floor === 2 ? "Portrait Wing" : "Midnight Wing";
   const floorMonsters = MONSTERS.filter((monster) => monster.floor === floor);
+  const activeCardWithStats = activeCard
+    ? {
+      ...activeCard,
+      ...(() => {
+        const stats = monsterAnalytics.find((item) => item.name === activeCard.name);
+        return stats
+          ? { fearRating: stats.averageFear, encounters: stats.encounters }
+          : {};
+      })(),
+    }
+    : null;
 
   return <main className="mansion-app">
     <div className="mansion-ambience" aria-hidden="true"><span /><span /><span /><span /><span /></div>
@@ -841,7 +1126,7 @@ function HauntedMansion({ onOpenDashboard }) {
           <div className="stage-corner stage-corner-tl" aria-hidden="true" /><div className="stage-corner stage-corner-br" aria-hidden="true" />
           {nearby && !dialogue && !activeCard && <button type="button" className="interaction-prompt" onClick={() => interactRef.current?.()}><span className="prompt-key">E</span><span><strong>{nearby.hint}</strong><small>{nearby.label}</small></span><span className="prompt-arrow">↗</span></button>}
           {dialogue && <InteractionDialogue dialogue={dialogue} onClose={() => setDialogue(null)} onOpenDashboard={() => { setDialogue(null); onOpenDashboard(); }} onViewCard={(monster) => { setDialogue(null); setActiveCard(monster); }} />}
-          {activeCard && <EmployeeCardModal monster={activeCard} onClose={() => setActiveCard(null)} />}
+          {activeCardWithStats && <EmployeeCardModal monster={activeCardWithStats} onClose={() => setActiveCard(null)} />}
         </div>
         <div className="controls-bar"><div className="control-cluster"><span className="keycap">W</span><div className="key-column"><span className="keycap">A</span><span className="keycap">S</span><span className="keycap">D</span></div><span className="control-caption">MOVE</span></div><div className="control-divider" /><div className="control-cluster"><span className="keycap keycap-wide">E</span><span className="control-caption">INTERACT</span></div><div className="control-divider" /><div className="control-cluster"><span className="keycap keycap-wide">ESC</span><span className="control-caption">CLOSE DIALOGUE</span></div><p className="controls-hint">WASD or arrow keys let you roam through each doorway.</p></div>
       </div>

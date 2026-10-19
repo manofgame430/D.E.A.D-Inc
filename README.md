@@ -8,7 +8,7 @@
 
   COLOR PALETTE            |  DEMO
 :-------------------------:|:-------------------------:
-<img style="width: 100%;" src="Haunted Corp color pallet.png" alt="Color Palette">   |  <img style="width: 100%;" src="example-here-is-a-sample.gif" alt="DEMO"> 
+<img style="width: 100%;" src="Haunted Corp color pallet.png" alt="Color Palette">   |  <video style="width: 100%;" src="HauntedCorpdemo.mp4" controls autoPlay muted loop> 
 </div>
 
 ## **KEY FEATURES:**
@@ -22,7 +22,7 @@
 - Secratary that gives general overview of all facilities
 
 ## **HOW TO USE (Visual Studio Code)**
-Use npm run seed inside the backend folder to generate the data and then use npm run dev in both the frontend and backend folder in order to properly start the program. Lastly explore and walk around.
+Use npm run seed inside the backend folder to generate the data and use npm run reset to delete any already generated data. Then use npm run dev in both the frontend and backend folder in order to properly start the program. Lastly explore and walk around.
 
 ## **LICENSE**
-CC-BY-NC
+CC-BY-NC (Credits to Crow Shade for Music)
